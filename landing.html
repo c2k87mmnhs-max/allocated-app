@@ -1,0 +1,1278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Allocated — Budget Software You Actually Own</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green: #2D5A27;
+    --green-mid: #4a7c42;
+    --green-light: #E8F0E7;
+    --green-pale: #f4f7f3;
+    --amber: #C17B2F;
+    --amber-light: #FDF2DC;
+    --text: #1A1714;
+    --text-mid: #4a4540;
+    --text-muted: #7A7268;
+    --border: #D9D3C7;
+    --surface: #FDFAF5;
+    --bg: #F5F2EC;
+    --red: #B5341A;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* ── Noise texture overlay ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0.4;
+  }
+
+  /* ── Nav ── */
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(245, 242, 236, 0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 60px;
+  }
+
+  .nav-logo {
+    font-family: 'Lora', serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--green);
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .nav-logo span {
+    color: var(--text-muted);
+    font-weight: 400;
+    font-style: italic;
+  }
+
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    list-style: none;
+  }
+
+  .nav-links a {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-mid);
+    text-decoration: none;
+    transition: color 0.15s;
+  }
+
+  .nav-links a:hover { color: var(--green); }
+
+  .nav-cta {
+    background: var(--green);
+    color: #fff !important;
+    padding: 8px 20px;
+    border-radius: 8px;
+    font-size: 14px !important;
+    transition: background 0.15s !important;
+  }
+
+  .nav-cta:hover { background: #3d7535 !important; color: #fff !important; }
+
+  /* ── Hero ── */
+  .hero {
+    min-height: calc(100vh - 60px);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    gap: 80px;
+    padding: 80px 48px 80px 80px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .hero-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--green);
+    background: var(--green-light);
+    padding: 5px 12px;
+    border-radius: 100px;
+    margin-bottom: 20px;
+  }
+
+  .hero-eyebrow::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    background: var(--green);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.8); }
+  }
+
+  h1 {
+    font-family: 'Lora', serif;
+    font-size: clamp(40px, 5vw, 58px);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+    color: var(--text);
+    margin-bottom: 24px;
+  }
+
+  h1 em {
+    font-style: italic;
+    color: var(--green);
+  }
+
+  .hero-sub {
+    font-size: 18px;
+    color: var(--text-mid);
+    line-height: 1.65;
+    margin-bottom: 36px;
+    max-width: 460px;
+    font-weight: 300;
+  }
+
+  .hero-sub strong { font-weight: 600; color: var(--text); }
+
+  .hero-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--green);
+    color: #fff;
+    padding: 14px 28px;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s;
+    box-shadow: 0 4px 20px rgba(45, 90, 39, 0.3);
+  }
+
+  .btn-primary:hover {
+    background: #3d7535;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 24px rgba(45, 90, 39, 0.4);
+  }
+
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--text-mid);
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    padding: 14px 4px;
+    border-bottom: 1.5px solid var(--border);
+    transition: all 0.15s;
+  }
+
+  .btn-secondary:hover { color: var(--green); border-color: var(--green); }
+
+  .hero-trust {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-top: 40px;
+    padding-top: 28px;
+    border-top: 1px solid var(--border);
+  }
+
+  .trust-item {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 12.5px;
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+
+  .trust-item svg { color: var(--green); flex-shrink: 0; }
+
+  /* ── App mockup ── */
+  .hero-visual {
+    position: relative;
+  }
+
+  .app-frame {
+    background: #FDFAF5;
+    border-radius: 12px;
+    box-shadow: 0 32px 80px rgba(26, 23, 20, 0.18), 0 0 0 1px rgba(0,0,0,0.06);
+    overflow: hidden;
+  }
+
+  .app-titlebar {
+    background: #2D5A27;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .titlebar-dot {
+    width: 11px; height: 11px;
+    border-radius: 50%;
+  }
+
+  .titlebar-dot.red { background: #ff5f57; }
+  .titlebar-dot.yellow { background: #febc2e; }
+  .titlebar-dot.green { background: #28c840; }
+
+  .titlebar-label {
+    flex: 1;
+    text-align: center;
+    font-size: 12px;
+    color: rgba(255,255,255,0.75);
+    font-family: 'DM Sans', sans-serif;
+    letter-spacing: .02em;
+  }
+
+  .app-header-strip {
+    background: #2D5A27;
+    padding: 8px 20px 14px;
+    display: flex;
+    gap: 16px;
+  }
+
+  .app-stat {
+    flex: 1;
+    text-align: center;
+  }
+
+  .app-stat-label {
+    font-size: 9px;
+    color: rgba(255,255,255,0.55);
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    margin-bottom: 2px;
+  }
+
+  .app-stat-val {
+    font-family: 'DM Mono', monospace;
+    font-size: 15px;
+    font-weight: 500;
+    color: #fff;
+  }
+
+  .app-stat-val.neg { color: #ff8a78; }
+  .app-stat-val.pos { color: #9de89a; }
+
+  .app-body { padding: 14px 0; }
+
+  .budget-group-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 16px;
+    background: rgba(232, 240, 231, 0.6);
+  }
+
+  .bgh-name {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: #3d7535;
+  }
+
+  .bgh-total {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    font-weight: 500;
+    color: #3d7535;
+  }
+
+  .budget-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 7px 16px 7px 28px;
+    border-bottom: 1px solid rgba(217, 211, 199, 0.4);
+  }
+
+  .br-name { font-size: 11px; color: #1A1714; font-weight: 400; }
+
+  .br-right {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+  }
+
+  .br-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    min-width: 52px;
+    text-align: right;
+  }
+
+  .br-num.assigned { color: #1A1714; font-weight: 500; }
+  .br-num.activity { color: #7A7268; }
+  .br-num.available.pos { color: #2D5A27; font-weight: 600; }
+  .br-num.available.neg { color: #B5341A; font-weight: 600; }
+
+  .savings-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 8px;
+    padding: 1px 5px;
+    border-radius: 3px;
+    background: var(--green-light);
+    color: var(--green);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+  }
+
+  .app-float-badge {
+    position: absolute;
+    bottom: -16px;
+    right: -20px;
+    background: #fff;
+    border-radius: 12px;
+    padding: 12px 16px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.14), 0 0 0 1px rgba(0,0,0,0.05);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    animation: floatUp 3s ease-in-out infinite;
+  }
+
+  @keyframes floatUp {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+  }
+
+  .badge-icon {
+    width: 36px; height: 36px;
+    background: var(--green-light);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+  }
+
+  .badge-text { font-size: 12px; font-weight: 600; color: var(--text); }
+  .badge-sub { font-size: 11px; color: var(--text-muted); font-weight: 400; }
+
+  /* ── Comparison section ── */
+  .section {
+    padding: 100px 48px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .section-eyebrow {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--green);
+    margin-bottom: 12px;
+  }
+
+  h2 {
+    font-family: 'Lora', serif;
+    font-size: clamp(30px, 4vw, 44px);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.025em;
+    color: var(--text);
+    margin-bottom: 16px;
+  }
+
+  h2 em { font-style: italic; color: var(--green); }
+
+  .section-sub {
+    font-size: 17px;
+    color: var(--text-muted);
+    max-width: 520px;
+    line-height: 1.65;
+    font-weight: 300;
+    margin-bottom: 56px;
+  }
+
+  /* ── Comparison table ── */
+  .comparison-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 2px 24px rgba(0,0,0,0.07);
+  }
+
+  .comparison-table th {
+    padding: 18px 24px;
+    font-size: 13px;
+    font-weight: 700;
+    text-align: left;
+    letter-spacing: .02em;
+  }
+
+  .comparison-table th:first-child {
+    background: var(--surface);
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border);
+    width: 40%;
+  }
+
+  .th-ynab {
+    background: #f0eefc;
+    color: #5b50b0;
+    border-bottom: 3px solid #8b80e8;
+    text-align: center;
+  }
+
+  .th-allocated {
+    background: var(--green);
+    color: #fff;
+    border-bottom: 3px solid #3d7535;
+    text-align: center;
+  }
+
+  .comparison-table td {
+    padding: 14px 24px;
+    font-size: 13.5px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+
+  .comparison-table td:first-child {
+    background: var(--surface);
+    color: var(--text-mid);
+    font-weight: 500;
+  }
+
+  .comparison-table td:nth-child(2) {
+    background: #faf9ff;
+    text-align: center;
+    color: var(--text-muted);
+  }
+
+  .comparison-table td:nth-child(3) {
+    background: #fafcf9;
+    text-align: center;
+    font-weight: 600;
+    color: var(--green);
+  }
+
+  .comparison-table tr:last-child td { border-bottom: none; }
+
+  .check { color: var(--green); font-size: 16px; }
+  .cross { color: #ccc; font-size: 16px; }
+  .pill-bad {
+    display: inline-block;
+    background: #fde8e5;
+    color: var(--red);
+    padding: 3px 10px;
+    border-radius: 100px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .pill-good {
+    display: inline-block;
+    background: var(--green-light);
+    color: var(--green);
+    padding: 3px 10px;
+    border-radius: 100px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  /* ── Features ── */
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    margin-top: 56px;
+  }
+
+  .feature-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 28px;
+    transition: all 0.2s;
+  }
+
+  .feature-card:hover {
+    border-color: var(--green-mid);
+    box-shadow: 0 8px 32px rgba(45, 90, 39, 0.1);
+    transform: translateY(-2px);
+  }
+
+  .feature-icon {
+    width: 44px; height: 44px;
+    background: var(--green-light);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    margin-bottom: 16px;
+  }
+
+  .feature-card h3 {
+    font-family: 'Lora', serif;
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 8px;
+    letter-spacing: -0.01em;
+  }
+
+  .feature-card p {
+    font-size: 13.5px;
+    color: var(--text-muted);
+    line-height: 1.65;
+  }
+
+  /* ── Who it's for ── */
+  .who-section {
+    background: var(--green);
+    padding: 100px 48px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .who-section::before {
+    content: '';
+    position: absolute;
+    top: -120px; right: -120px;
+    width: 480px; height: 480px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 50%;
+  }
+
+  .who-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: center;
+  }
+
+  .who-section h2 { color: #fff; }
+  .who-section h2 em { color: rgba(255,255,255,0.6); }
+
+  .who-section .section-sub { color: rgba(255,255,255,0.7); }
+
+  .who-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .who-card {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 12px;
+    padding: 20px 22px;
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    transition: background 0.2s;
+  }
+
+  .who-card:hover { background: rgba(255,255,255,0.15); }
+
+  .who-card-icon {
+    font-size: 26px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .who-card h4 {
+    font-size: 14px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 4px;
+    letter-spacing: -0.01em;
+  }
+
+  .who-card p {
+    font-size: 13px;
+    color: rgba(255,255,255,0.65);
+    line-height: 1.55;
+  }
+
+  /* ── Pricing ── */
+  .pricing-section {
+    padding: 100px 48px;
+    text-align: center;
+  }
+
+  .pricing-inner { max-width: 500px; margin: 0 auto; }
+
+  .price-card {
+    background: var(--surface);
+    border: 2px solid var(--green);
+    border-radius: 20px;
+    padding: 44px 48px;
+    margin-top: 48px;
+    position: relative;
+    box-shadow: 0 12px 48px rgba(45, 90, 39, 0.12);
+  }
+
+  .price-badge {
+    position: absolute;
+    top: -14px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--amber);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 5px 18px;
+    border-radius: 100px;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .price-amount {
+    font-family: 'Lora', serif;
+    font-size: 72px;
+    font-weight: 700;
+    color: var(--green);
+    line-height: 1;
+    letter-spacing: -0.04em;
+  }
+
+  .price-amount sup {
+    font-size: 28px;
+    font-weight: 600;
+    vertical-align: super;
+    letter-spacing: 0;
+  }
+
+  .price-period {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-top: 6px;
+    margin-bottom: 32px;
+  }
+
+  .price-features {
+    list-style: none;
+    text-align: left;
+    margin-bottom: 36px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .price-features li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    color: var(--text-mid);
+  }
+
+  .price-features li::before {
+    content: '✓';
+    color: var(--green);
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .ynab-compare {
+    margin-top: 20px;
+    padding: 14px;
+    background: var(--amber-light);
+    border-radius: 8px;
+    font-size: 12.5px;
+    color: var(--amber);
+    font-weight: 600;
+    line-height: 1.5;
+  }
+
+  /* ── Footer ── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 40px 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .footer-logo {
+    font-family: 'Lora', serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--green);
+  }
+
+  .footer-note {
+    font-size: 12.5px;
+    color: var(--text-muted);
+  }
+
+  /* ── Animations ── */
+  .fade-in {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+
+  .fade-in.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ── Founder note ── */
+  .founder-section {
+    padding: 80px 24px 60px;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .founder-inner {
+    max-width: 680px;
+    margin: 0 auto;
+  }
+
+  .founder-eyebrow {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--green);
+    margin-bottom: 12px;
+    text-align: center;
+  }
+
+  .founder-section h2 {
+    text-align: center;
+    margin-bottom: 32px;
+    font-size: clamp(28px, 3.6vw, 40px);
+  }
+
+  .founder-body {
+    font-family: 'Lora', serif;
+    font-size: 18px;
+    line-height: 1.75;
+    color: var(--text-mid);
+  }
+
+  .founder-body p {
+    margin-bottom: 20px;
+  }
+
+  .founder-body p:last-child {
+    margin-bottom: 0;
+    text-align: right;
+    font-style: italic;
+    color: var(--text-muted);
+    font-size: 16px;
+  }
+
+  .founder-body strong {
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  /* ── Student discount card ── */
+  .student-card {
+    background: var(--green-pale);
+    border: 1.5px dashed var(--green-mid);
+    border-radius: 16px;
+    padding: 28px 32px;
+    margin-top: 28px;
+    text-align: left;
+  }
+
+  .student-card-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .student-card-icon {
+    font-size: 28px;
+  }
+
+  .student-card h3 {
+    font-family: 'Lora', serif;
+    font-size: 19px;
+    font-weight: 700;
+    color: var(--green);
+    letter-spacing: -0.01em;
+  }
+
+  .student-card-price {
+    font-family: 'DM Mono', monospace;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--green);
+    background: #fff;
+    padding: 3px 10px;
+    border-radius: 100px;
+    margin-left: auto;
+  }
+
+  .student-card p {
+    font-size: 14px;
+    color: var(--text-mid);
+    line-height: 1.6;
+    margin-bottom: 14px;
+  }
+
+  .student-card a.verify-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--green);
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    border-bottom: 1.5px solid var(--green);
+    padding-bottom: 1px;
+  }
+
+  .student-card a.verify-link:hover { opacity: 0.8; }
+
+  /* ── Responsive ── */
+  @media (max-width: 900px) {
+    .hero { grid-template-columns: 1fr; padding: 60px 24px; }
+    .hero-visual { display: none; }
+    .section { padding: 60px 24px; }
+    .features-grid { grid-template-columns: 1fr; }
+    .who-inner { grid-template-columns: 1fr; gap: 40px; }
+    .who-section { padding: 60px 24px; }
+    nav { padding: 0 24px; }
+    .nav-links { gap: 16px; }
+    .pricing-section { padding: 60px 24px; }
+    footer { flex-direction: column; gap: 12px; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav>
+  <div class="nav-logo" style="display:flex;align-items:center;gap:10px;">
+  <svg width="28" height="20" viewBox="0 0 28 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect width="28" height="20" rx="3" fill="#2D5A27"/>
+    <polyline points="0,0 14,11 28,0" stroke="#E8F0E7" stroke-width="1.8" stroke-linejoin="round" fill="none"/>
+    <text x="14" y="17" text-anchor="middle" font-family="Georgia,serif" font-size="11" fill="#E8F0E7" font-weight="600" font-style="italic">a</text>
+  </svg>allocated</div>
+  <ul class="nav-links">
+    <li><a href="#why">Why</a></li>
+    <li><a href="#features">Features</a></li>
+    <li><a href="#pricing">Pricing</a></li>
+    <li><a href="https://allocatedapp.gumroad.com/l/fzqas" target="_blank" class="nav-cta">Get Allocated</a></li>
+  </ul>
+</nav>
+
+<!-- Hero -->
+<section>
+  <div class="hero">
+    <div>
+      <div class="hero-eyebrow">macOS App · One-Time Purchase · 3-Day Free Trial</div>
+      <h1>Know what you can spend.<br><em>Without paying every month</em><br>to find out.</h1>
+      <p class="hero-sub">
+        I'm a medical resident. I built this because I was tired of paying <strong>over $100 a year</strong> just to look at my own checking account, and I didn't trust the free apps either. Envelope-style budgeting, on your own Mac. One price, yours forever. Free for 3 days.
+      </p>
+      <div class="hero-actions">
+        <a href="https://allocatedapp.gumroad.com/l/fzqas" target="_blank" class="btn-primary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Try Free for 3 Days
+        </a>
+        <a href="#why" class="btn-secondary">See how it works →</a>
+      </div>
+      <div class="hero-trust">
+        <div class="trust-item">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          3-day free trial
+        </div>
+        <div class="trust-item">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          Pay once, never again
+        </div>
+        <div class="trust-item">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          Data stays on your Mac
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-visual">
+      <div class="app-frame">
+        <div class="app-titlebar">
+          <div class="titlebar-dot red"></div>
+          <div class="titlebar-dot yellow"></div>
+          <div class="titlebar-dot green"></div>
+          <div class="titlebar-label">✦ allocated — April 2026</div>
+        </div>
+        <div class="app-header-strip">
+          <div class="app-stat"><div class="app-stat-label">Inflow</div><div class="app-stat-val pos">$4,200</div></div>
+          <div class="app-stat"><div class="app-stat-label">Budgeted</div><div class="app-stat-val">$3,950</div></div>
+          <div class="app-stat"><div class="app-stat-label">To Budget</div><div class="app-stat-val pos">$250</div></div>
+          <div class="app-stat"><div class="app-stat-label">Activity</div><div class="app-stat-val neg">−$2,847</div></div>
+        </div>
+        <!-- Column headers -->
+        <div style="display:flex;padding:6px 16px;border-bottom:1px solid var(--border);background:var(--surface2);">
+          <div style="flex:2;font-size:9px;font-weight:700;letter-spacing:.08em;color:var(--text-muted);text-transform:uppercase;">Category</div>
+          <div style="flex:1;font-size:9px;font-weight:700;letter-spacing:.08em;color:var(--text-muted);text-transform:uppercase;text-align:right;">Assigned</div>
+          <div style="flex:1;font-size:9px;font-weight:700;letter-spacing:.08em;color:var(--text-muted);text-transform:uppercase;text-align:right;">Activity</div>
+          <div style="flex:1;font-size:9px;font-weight:700;letter-spacing:.08em;color:var(--text-muted);text-transform:uppercase;text-align:right;">Available</div>
+        </div>
+        <div class="app-body">
+          <div class="budget-group-header">
+            <span class="bgh-name">🏠 Essentials</span>
+            <span class="bgh-total">$2,350</span>
+          </div>
+          <div class="budget-row">
+            <span class="br-name">Rent</span>
+            <div class="br-right">
+              <span class="br-num assigned">$1,800</span>
+              <span class="br-num activity">−$1,800</span>
+              <span class="br-num available pos">$0</span>
+            </div>
+          </div>
+          <div class="budget-row">
+            <span class="br-name">Groceries</span>
+            <div class="br-right">
+              <span class="br-num assigned">$350</span>
+              <span class="br-num activity">−$297</span>
+              <span class="br-num available pos">$53</span>
+            </div>
+          </div>
+          <div class="budget-row">
+            <span class="br-name">Utilities</span>
+            <div class="br-right">
+              <span class="br-num assigned">$200</span>
+              <span class="br-num activity">−$184</span>
+              <span class="br-num available pos">$16</span>
+            </div>
+          </div>
+          <div class="budget-group-header">
+            <span class="bgh-name">🏦 Savings Goals</span>
+            <span class="bgh-total">$600</span>
+          </div>
+          <div class="budget-row">
+            <span class="br-name">Emergency Fund <span class="savings-pill">Goal</span></span>
+            <div class="br-right">
+              <span class="br-num assigned">$400</span>
+              <span class="br-num activity"></span>
+              <span class="br-num available pos">$8,200</span>
+            </div>
+          </div>
+          <div class="budget-row">
+            <span class="br-name">Travel Fund <span class="savings-pill">Goal</span></span>
+            <div class="br-right">
+              <span class="br-num assigned">$200</span>
+              <span class="br-num activity">−$94</span>
+              <span class="br-num available pos">$1,240</span>
+            </div>
+          </div>
+          <div class="budget-group-header">
+            <span class="bgh-name">✨ Quality of Life</span>
+            <span class="bgh-total">$480</span>
+          </div>
+          <div class="budget-row">
+            <span class="br-name">Dining Out</span>
+            <div class="br-right">
+              <span class="br-num assigned">$200</span>
+              <span class="br-num activity">−$247</span>
+              <span class="br-num available neg">−$47</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="app-float-badge">
+        <div class="badge-icon">🎉</div>
+        <div>
+          <div class="badge-text">Emergency Fund</div>
+          <div class="badge-sub">78% of goal · $8,200 saved</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Founder note -->
+<section class="founder-section">
+  <div class="founder-inner">
+    <div class="founder-eyebrow">Why this exists</div>
+    <h2>I built this <em>for myself.</em></h2>
+    <div class="founder-body">
+      <p>When I started a real salary last year, with student loans and a fixed paycheck, I wanted to feel in control of my money and actually understand where it was going. Not just hope I'd make it to the next paycheck.</p>
+
+      <p>Every budgeting app I tried wanted a subscription. $80, $90, over $100 a year, forever, just to look at my own checking account. The free ones showed me ads or quietly sold my data. The privacy-focused alternatives looked like they were last redesigned in 2008.</p>
+
+      <p>So I tracked everything in Excel for a while. That got old fast. I wanted something I could pay for once, that ran on my own Mac and was actually fast to use. Keyboard shortcuts for everything. Walkthrough modals at the start and end of each month so I'd never have to remember the steps. No clicking through twelve menus to assign a few dollars.</p>
+
+      <p>So I built it. <strong>Allocated is the app I wished I had when I started training.</strong></p>
+
+      <p style="font-style: normal; color: var(--text-muted); font-size: 15px; line-height: 1.6; text-align: left; padding: 16px 20px; background: var(--green-pale); border-left: 3px solid var(--green-mid); border-radius: 0 8px 8px 0; margin-top: 28px; margin-bottom: 20px;">A note on why there's no name or photo: I work with patients, and a public-facing internet profile is complicated when you're a doctor. So I'm keeping things low-key for now. Every email goes to me, though, and I answer them.</p>
+
+      <p>— the developer</p>
+    </div>
+  </div>
+</section>
+
+<!-- Why section -->
+<section id="why" style="background: var(--surface); padding: 100px 0;">
+  <div class="section" style="padding-top: 0; padding-bottom: 0;">
+    <div class="section-eyebrow">Why Allocated</div>
+    <h2>Budgeting that fits<br><em>a real life.</em></h2>
+    <p class="section-sub">A subscription-free Mac app, designed around how money actually works on a fixed paycheck. Not around tracking every penny on principle.</p>
+
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:48px;">
+      <div style="background:var(--bg);border-radius:14px;padding:28px;border:1px solid var(--border);">
+        <div style="font-size:28px;margin-bottom:12px;">💸</div>
+        <div style="font-size:16px;font-weight:700;color:var(--text);margin-bottom:8px;font-family:'Lora',serif;">Stop dreading your bank balance</div>
+        <div style="font-size:13.5px;color:var(--text-muted);line-height:1.65;">You can see exactly how much is left in every category, all the time. No math in your head. No opening your bank app five times a day to check.</div>
+      </div>
+      <div style="background:var(--bg);border-radius:14px;padding:28px;border:1px solid var(--border);">
+        <div style="font-size:28px;margin-bottom:12px;">🪴</div>
+        <div style="font-size:16px;font-weight:700;color:var(--text);margin-bottom:8px;font-family:'Lora',serif;">Pay once. That's it.</div>
+        <div style="font-size:13.5px;color:var(--text-muted);line-height:1.65;">$59 one time. No subscription, no Pro tier, no email a year from now telling you the price went up. The opposite of every other finance app.</div>
+      </div>
+      <div style="background:var(--bg);border-radius:14px;padding:28px;border:1px solid var(--border);">
+        <div style="font-size:28px;margin-bottom:12px;">🔒</div>
+        <div style="font-size:16px;font-weight:700;color:var(--text);margin-bottom:8px;font-family:'Lora',serif;">Your data stays on your Mac</div>
+        <div style="font-size:13.5px;color:var(--text-muted);line-height:1.65;">Everything lives in one file on your computer. No account, no server, no breach risk. If you go offline, the app still works.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Features -->
+<section id="features">
+  <div class="section" style="padding-top: 100px; padding-bottom: 0;">
+    <div class="section-eyebrow">Features</div>
+    <h2>Every tool you need.<br><em>Nothing you don't.</em></h2>
+    <p class="section-sub">Everything you need to run your money on a fixed paycheck. No investment doom-scrolling, no credit score nag, no AI bots second-guessing you.</p>
+
+    <div class="features-grid" style="padding-bottom:56px;">
+      <div class="feature-card fade-in">
+        <div class="feature-icon">✉️</div>
+        <h3>Envelope Budgeting</h3>
+        <p>Give every dollar a job before the month starts. Move money between envelopes as life happens — no guilt, just clarity.</p>
+      </div>
+      <div class="feature-card fade-in" style="transition-delay: 0.1s">
+        <div class="feature-icon">🏦</div>
+        <h3>Savings Goal Folders</h3>
+        <p>Track progress toward Emergency Fund, Travel, a new laptop — anything. Visual progress bars and monthly contribution tracking built in.</p>
+      </div>
+      <div class="feature-card fade-in" style="transition-delay: 0.2s">
+        <div class="feature-icon">📥</div>
+        <h3>CSV Bank Import</h3>
+        <p>Import transactions from Chase, Bank of America, Wells Fargo, Capital One, and Citi. Smart auto-categorization with custom rules.</p>
+      </div>
+      <div class="feature-card fade-in" style="transition-delay: 0.0s">
+        <div class="feature-icon">📅</div>
+        <h3>Monthly Workflow</h3>
+        <p>A guided wizard walks you through starting each month — log your paycheck, assign your dollars, review your goals. Takes 5 minutes.</p>
+      </div>
+      <div class="feature-card fade-in" style="transition-delay: 0.1s">
+        <div class="feature-icon">📊</div>
+        <h3>End of Month Report</h3>
+        <p>Review your spending, cover any overspending, sweep surplus to savings. A complete month-close ritual built right into the app.</p>
+      </div>
+      <div class="feature-card fade-in" style="transition-delay: 0.2s">
+        <div class="feature-icon">📈</div>
+        <h3>Net Worth Tracking</h3>
+        <p>Cash, savings, investments, CDs, and liabilities in one place. Auto-updated monthly chart so you can watch your net worth grow.</p>
+      </div>
+      <div class="feature-card fade-in">
+        <div class="feature-icon">🔒</div>
+        <h3>Your Data, Your Machine</h3>
+        <p>Everything is stored in a single JSON file on your Mac. Automatic rolling backups. No cloud, no account, no breach risk.</p>
+      </div>
+      <div class="feature-card fade-in" style="transition-delay: 0.1s">
+        <div class="feature-icon">🎓</div>
+        <h3>Built for Beginners</h3>
+        <p>A full setup wizard, newbie mode with inline tips, and a comprehensive help section mean you don't need to read a manual.</p>
+      </div>
+      <div class="feature-card fade-in" style="transition-delay: 0.2s">
+        <div class="feature-icon">📤</div>
+        <h3>Spending Reports Export</h3>
+        <p>Export a clean CSV of your spending by category across any date range. Share with a financial advisor or just keep for your records.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Who it's for -->
+<section id="who" class="who-section">
+  <div class="who-inner">
+    <div>
+      <div class="section-eyebrow" style="color: rgba(255,255,255,0.6);">Who it's for</div>
+      <h2>Built for people<br><em>just figuring it out.</em></h2>
+        <p class="section-sub">If you're new to having a real paycheck and don't want a monthly subscription on top of everything else, this is for you.</p>
+    </div>
+    <div class="who-cards">
+      <div class="who-card">
+        <div class="who-card-icon">🩺</div>
+        <div>
+          <h4>Medical trainees & residents</h4>
+          <p>Built by one. Designed for fixed pay, loan repayment, and trying to save while you're already exhausted. <strong style="color:#fff;">$39 with verification.</strong></p>
+        </div>
+      </div>
+      <div class="who-card">
+        <div class="who-card-icon">🎓</div>
+        <div>
+          <h4>First-time budgeters</h4>
+          <p>A setup wizard, inline tips, and a guided monthly workflow walk you through everything. No "zero-based budgeting" jargon required. <strong style="color:#fff;">Students $39 with verification.</strong></p>
+        </div>
+      </div>
+      <div class="who-card">
+        <div class="who-card-icon">💸</div>
+        <div>
+          <h4>Anyone tired of subscriptions</h4>
+          <p>Already know envelope budgeting and ready to own your software outright? Same approach, one price, no recurring bill ever.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Pricing -->
+<section id="pricing" class="pricing-section">
+  <div class="pricing-inner">
+    <div class="section-eyebrow">Pricing</div>
+    <h2>One price.<br><em>Forever yours.</em></h2>
+    <p class="section-sub" style="margin: 0 auto 0; text-align: center;">Pay once, use it forever. No renewals, no account, no one else's server ever touches your financial data.</p>
+
+    <div class="price-card">
+      <div class="price-badge">One-Time Purchase</div>
+      <div class="price-amount"><sup>$</sup>59</div>
+      <div class="price-period">pay once · yours forever</div>
+        <div style="font-size:12px;color:var(--green);margin-top:-8px;margin-bottom:8px;font-weight:600;">✓ 3-day free trial — no credit card needed</div>
+      <ul class="price-features">
+        <li>Full macOS app, no limitations</li>
+        <li>All features included — no tiers</li>
+        <li>Free updates, forever</li>
+        <li>Your data stays on your Mac</li>
+        <li>No account, no login</li>
+        <li>Automatic rolling backups</li>
+      </ul>
+      <a href="https://allocatedapp.gumroad.com/l/fzqas" target="_blank" class="btn-primary" style="width: 100%; justify-content: center; font-size: 16px; padding: 16px;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Download Allocated — $59
+      </a>
+      <div class="ynab-compare">
+        💡 Try free for 3 days, no credit card required. If it works for you, pay once and it's yours forever.
+      </div>
+    </div>
+
+    <!-- Student / resident discount -->
+    <div class="student-card">
+      <div class="student-card-head">
+        <span class="student-card-icon">🎓</span>
+        <h3>Students & medical trainees</h3>
+        <span class="student-card-price">$39</span>
+      </div>
+      <p>If you're a student, or in any stage of medical training (med school, residency, fellowship), you get $20 off. I built this on a trainee budget and I want it to be accessible to other people in the same boat.</p>
+      <p style="font-size: 13.5px; color: var(--text-mid); line-height: 1.65; margin-top: 16px; margin-bottom: 14px;"><strong style="color: var(--text);">How to get the discount:</strong> Email me a photo of your student ID or hospital badge, plus a screenshot of your <strong style="color: var(--text);">current</strong> class schedule or training rotation. Send it from your university or hospital email address. I'll email you back a discount code.</p>
+      <p style="font-size: 12.5px; color: var(--text-muted); line-height: 1.6; margin-top: 0; margin-bottom: 14px; font-style: italic;">Meant for current students and active medical trainees. If you're a past student with an .edu address still active, or work at a hospital but aren't in training, please pay full price. The discount works on trust.</p>
+      <p style="margin-bottom: 0;">
+        <a class="verify-link" href="mailto:allocatedapp1@gmail.com?subject=Student%2FTrainee%20discount%20code">
+          allocatedapp1@gmail.com →
+        </a>
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer>
+  <div class="footer-logo" style="display:flex;align-items:center;gap:8px;">
+    <svg width="22" height="16" viewBox="0 0 28 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="28" height="20" rx="3" fill="#2D5A27"/>
+      <polyline points="0,0 14,11 28,0" stroke="#E8F0E7" stroke-width="1.8" stroke-linejoin="round" fill="none"/>
+      <text x="14" y="17" text-anchor="middle" font-family="Georgia,serif" font-size="11" fill="#E8F0E7" font-weight="600" font-style="italic">a</text>
+    </svg>allocated</div>
+  <div class="footer-note">Made by a medical resident, for people figuring it out. macOS only.</div>
+</footer>
+
+<script>
+  // Scroll animations
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+  document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+  // Smooth nav highlighting
+  const sections = document.querySelectorAll('section[id], section');
+  const navLinks = document.querySelectorAll('.nav-links a');
+
+  window.addEventListener('scroll', () => {
+    let current = '';
+    sections.forEach(s => {
+      if (window.scrollY >= s.offsetTop - 80) current = s.id;
+    });
+    navLinks.forEach(a => {
+      a.style.color = a.getAttribute('href') === '#' + current ? 'var(--green)' : '';
+    });
+  });
+</script>
+
+</body>
+</html>
